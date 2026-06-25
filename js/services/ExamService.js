@@ -44,12 +44,21 @@ export class ExamService {
         });
         return allExamsClones;
     }
-    // Save to Local Stroage
+    // Save to Local Storage (handles both new and updated exams)
     saveExam(exam) {
         const exams = this.getAllExams();
+        // Find if the exam already exists in the system by its ID
+        const existingExamIndex = exams.findIndex(e => e.id === exam.id);
 
-        exams.push(exam);
+        if (existingExamIndex >= 0) {
+            // If it exists, overwrite (update) it
+            exams[existingExamIndex] = exam;
+        } else {
+            // If it does not exist, add it as a new exam
+            exams.push(exam);
+        }
 
+        // Save the updated list back to localStorage
         localStorage.setItem(this.storageKey, JSON.stringify(exams));
     }
 
@@ -64,7 +73,7 @@ export class ExamService {
     getExamById(examId) {
         const exams = this.getAllExams();
 
-        return exams.find(exam => exam.id === examId);
+        return exams.find(exam => String(exam.id) === String(examId));
     }
 
     clearAllExams() {
