@@ -7,27 +7,31 @@ export class ExamService {
     }
 
     getAllExams() {
-        // Get the exams data from localStorage
+        // Retrieve raw data from localStorage
         const data = localStorage.getItem(this.storageKey);
 
         if (!data) {
             return [];
         }
 
-        // continue if key exists, parse the JSON data and create Exam and Question instances
+        // Parse the JSON string back into basic objects
         const plainExams = JSON.parse(data);
 
-        // for each examData(Exam), return new Exam object with the same properties,
-        // and for each questionData(Question) in examData.questions,
-        // return new Question object with the same properties
-
-        // clone the data to new objects to avoid direct manipulation of the data stored in localStorage.
+        // Reconstruct proper Exam and Question class instances
         let allExamsClones = plainExams.map(examData => {
             const exam = new Exam(examData.title);
 
+            // Restore base properties
             exam.id = examData.id;
             exam.createdAt = examData.createdAt;
-            // Inner Clone for Questions
+
+            // Restore extended details
+            exam.description = examData.description;
+            exam.category = examData.category;
+            exam.examCode = examData.examCode;
+            exam.timeLimit = examData.timeLimit;
+
+            // Reconstruct the questions array with Question instances
             exam.questions = examData.questions.map(questionData => {
                 const question = new Question(
                     questionData.text,
@@ -42,29 +46,28 @@ export class ExamService {
 
             return exam;
         });
+
         return allExamsClones;
     }
-    // Save to Local Storage (handles both new and updated exams)
+
     saveExam(exam) {
         const exams = this.getAllExams();
-        // Find if the exam already exists in the system by its ID
         const existingExamIndex = exams.findIndex(e => e.id === exam.id);
 
         if (existingExamIndex >= 0) {
-            // If it exists, overwrite (update) it
+            // Update existing exam
             exams[existingExamIndex] = exam;
         } else {
-            // If it does not exist, add it as a new exam
+            // Add new exam
             exams.push(exam);
         }
 
-        // Save the updated list back to localStorage
+        // Commit changes to localStorage
         localStorage.setItem(this.storageKey, JSON.stringify(exams));
     }
 
     deleteExam(examId) {
         const exams = this.getAllExams();
-
         const filteredExams = exams.filter(exam => exam.id !== examId);
 
         localStorage.setItem(this.storageKey, JSON.stringify(filteredExams));
@@ -72,7 +75,7 @@ export class ExamService {
 
     getExamById(examId) {
         const exams = this.getAllExams();
-
+        // Force string comparison to prevent type mismatch errors
         return exams.find(exam => String(exam.id) === String(examId));
     }
 

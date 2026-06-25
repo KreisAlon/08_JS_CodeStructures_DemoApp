@@ -8,10 +8,15 @@ const examId = urlParams.get("id");
 
 // DOM Elements
 const editExamTitle = document.getElementById("editExamTitle");
+const editExamDescription = document.getElementById("editExamDescription");
+const editExamCategory = document.getElementById("editExamCategory");
+const editExamCode = document.getElementById("editExamCode");
+const editExamTime = document.getElementById("editExamTime");
+
 const editQuestionsList = document.getElementById("editQuestionsList");
 const saveChangesBtn = document.getElementById("saveChangesBtn");
 const editMessage = document.getElementById("editMessage");
-const addNewQuestionBtn = document.getElementById("addNewQuestionBtn"); // הוספת המשתנה לכפתור החדש
+const addNewQuestionBtn = document.getElementById("addNewQuestionBtn");
 
 // Fetch the exam object
 const currentExam = examService.getExamById(examId);
@@ -19,8 +24,13 @@ const currentExam = examService.getExamById(examId);
 if (!currentExam) {
     editMessage.innerHTML = `<div class="alert alert-danger">Exam not found!</div>`;
 } else {
-    // Populate the exam title
+    // Populate the form fields with existing data
     editExamTitle.value = currentExam.title;
+    editExamDescription.value = currentExam.description;
+    editExamCategory.value = currentExam.category;
+    editExamCode.value = currentExam.examCode;
+    editExamTime.value = currentExam.timeLimit;
+
     // Render the editable questions
     renderQuestions();
 }
@@ -79,7 +89,24 @@ function renderQuestions() {
     document.querySelectorAll(".remove-q-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             const indexToRemove = e.target.getAttribute("data-index");
+
+            // Check if this is the last question in the exam
+            if (currentExam.questions.length === 1) {
+                const confirmDelete = confirm("This is the last question. Deleting it will delete the entire exam. Are you sure?");
+
+                if (confirmDelete) {
+                    // Delete the exam entirely
+                    examService.deleteExam(currentExam.id);
+                    alert("Exam deleted successfully.");
+                    // Redirect back to teacher dashboard
+                    window.location.href = "teacher.html";
+                }
+                return; // Stop here whether they confirmed or canceled
+            }
+
+            // If it's not the last question, just remove it normally
             currentExam.questions.splice(indexToRemove, 1);
+
             // Re-render the list after deletion
             renderQuestions();
         });
@@ -107,8 +134,12 @@ saveChangesBtn.addEventListener("click", () => {
         return;
     }
 
-    // Update the exam title
+    // Update the exam details
     currentExam.title = newTitle;
+    currentExam.description = editExamDescription.value.trim();
+    currentExam.category = editExamCategory.value.trim();
+    currentExam.examCode = editExamCode.value.trim();
+    currentExam.timeLimit = parseInt(editExamTime.value) || 0;
 
     // Loop through all questions to save their updated values from the inputs
     for (let i = 0; i < currentExam.questions.length; i++) {
@@ -131,9 +162,9 @@ saveChangesBtn.addEventListener("click", () => {
         }
 
         // Apply changes to the question object
-        currentExam.questions[i].text = qText; // שינוי ל-text
+        currentExam.questions[i].text = qText;
         currentExam.questions[i].answers = [ans0, ans1, ans2, ans3];
-        currentExam.questions[i].correctAnswerIndex = correctNum - 1; // Convert 1-4 back to 0-3 index
+        currentExam.questions[i].correctAnswerIndex = correctNum - 1;
     }
 
     // Save the updated exam back to local storage
