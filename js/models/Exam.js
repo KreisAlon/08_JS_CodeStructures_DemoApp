@@ -1,10 +1,14 @@
 export class Exam {
-    constructor(title) {
-        // Generate a unique ID using the current time in milliseconds (safe for all environments)
-        this.id = Date.now().toString();
+    constructor(title, description = "", category = "", examCode = "", timeLimit = 0) {
+        // Generate a unique ID using the current time and a random string
+        this.id = Date.now().toString() + Math.random().toString(36).substring(2, 9);
 
-        // Set the exam title
+        // Basic exam details
         this.title = title;
+        this.description = description;
+        this.category = category;
+        this.examCode = examCode;
+        this.timeLimit = timeLimit; // Time limit in minutes
 
         // Initialize an empty array to store the questions
         this.questions = [];

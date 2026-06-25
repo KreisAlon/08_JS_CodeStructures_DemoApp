@@ -8,23 +8,32 @@ const examUI = new ExamUI(examService);
 
 let currentExam = null;
 
+// DOM Elements - Added new fields
 const examTitleInput = document.getElementById("examTitle");
-const questionTextInput = document.getElementById("questionText");
+const examDescInput = document.getElementById("examDescription");
+const examCatInput = document.getElementById("examCategory");
+const examCodeInput = document.getElementById("examCode");
+const examTimeInput = document.getElementById("examTime");
 
+const questionTextInput = document.getElementById("questionText");
 const answer1Input = document.getElementById("answer1");
 const answer2Input = document.getElementById("answer2");
 const answer3Input = document.getElementById("answer3");
 const answer4Input = document.getElementById("answer4");
-
 const correctAnswerInput = document.getElementById("correctAnswer");
 
 const addQuestionBtn = document.getElementById("addQuestionBtn");
 const saveExamBtn = document.getElementById("saveExamBtn");
-
 const examListElement = document.getElementById("examList");
 
 addQuestionBtn.addEventListener("click", () => {
+    // Pull all values from the DOM
     const title = examTitleInput.value.trim();
+    const description = examDescInput.value.trim();
+    const category = examCatInput.value.trim();
+    const examCode = examCodeInput.value.trim();
+    const timeLimit = parseInt(examTimeInput.value) || 0;
+
     const questionText = questionTextInput.value.trim();
 
     const answers = [
@@ -36,6 +45,7 @@ addQuestionBtn.addEventListener("click", () => {
 
     const correctAnswerNumber = Number(correctAnswerInput.value);
 
+    // Validation
     if (!title) {
         examUI.showBuilderMessage("Please enter exam title.", "danger");
         return;
@@ -56,8 +66,9 @@ addQuestionBtn.addEventListener("click", () => {
         return;
     }
 
+    // Create exam if it doesn't exist, now with all details
     if (!currentExam) {
-        currentExam = new Exam(title);
+        currentExam = new Exam(title, description, category, examCode, timeLimit);
     }
 
     const correctAnswerIndex = correctAnswerNumber - 1;
@@ -89,13 +100,25 @@ saveExamBtn.addEventListener("click", () => {
         return;
     }
 
+    // In case the user updated the exam details before hitting save
+    currentExam.title = examTitleInput.value.trim();
+    currentExam.description = examDescInput.value.trim();
+    currentExam.category = examCatInput.value.trim();
+    currentExam.examCode = examCodeInput.value.trim();
+    currentExam.timeLimit = parseInt(examTimeInput.value) || 0;
+
     examService.saveExam(currentExam);
 
     examUI.showBuilderMessage("Exam saved successfully.", "success");
 
     currentExam = null;
 
+    // Clear all exam fields
     examTitleInput.value = "";
+    examDescInput.value = "";
+    examCatInput.value = "";
+    examCodeInput.value = "";
+    examTimeInput.value = "";
 
     examUI.renderExamList();
 });
@@ -105,7 +128,6 @@ examListElement.addEventListener("click", event => {
 
     if (event.target.classList.contains("run-btn")) {
         const exam = examService.getExamById(examId);
-
         examUI.renderExamRunner(exam);
     }
 
@@ -117,19 +139,16 @@ examListElement.addEventListener("click", event => {
         }
 
         examService.deleteExam(examId);
-
         examUI.renderExamList();
     }
 });
 
 function clearQuestionInputs() {
     questionTextInput.value = "";
-
     answer1Input.value = "";
     answer2Input.value = "";
     answer3Input.value = "";
     answer4Input.value = "";
-
     correctAnswerInput.value = "";
 }
 
