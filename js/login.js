@@ -24,17 +24,10 @@ loginForm.addEventListener("submit", (event) => {
     // Check the role to know which page to link to
     let linkUrl = "";
     if (user.role === "teacher") {
-        linkUrl = "teacher.html";
+        window.location.href = "teacher.html";
     } else {
-        linkUrl = "student.html";
+        window.location.href = "student.html";
     }
 
-    // Show a success message with a regular HTML link
-    messageBox.innerHTML = `
-        <div class="alert alert-success mt-3">
-            התחברות מוצלחת! 
-            <br>
-            <a href="${linkUrl}" class="alert-link">לחץ כאן כדי להמשיך לדף שלך</a>
-        </div>
-    `;
+    return; // Stop the function here
 });

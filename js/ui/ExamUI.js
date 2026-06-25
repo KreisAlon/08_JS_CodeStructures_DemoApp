@@ -20,12 +20,12 @@ export class ExamUI {
     this.builderMessageElement.innerHTML = "";
   }
 
-  // Render Exam List (JS OBJECTS) and display them in the UI
   renderExamList() {
     const exams = this.examService.getAllExams();
 
     this.examListElement.innerHTML = "";
 
+    // Handle empty state
     if (exams.length === 0) {
       this.examListElement.innerHTML = `
         <p class="text-muted">No exams saved yet.</p>
@@ -33,37 +33,57 @@ export class ExamUI {
       return;
     }
 
-    // For each exam create div and add it to The html
+    // Loop through the exams array and build the DOM elements
     exams.forEach(exam => {
       const div = document.createElement("div");
-      div.className = "exam-card";
 
+      // Apply Bootstrap classes for a clean card layout
+      div.className = "exam-card card mb-3 p-3 shadow-sm border";
+
+      // Extract properties directly. Fallbacks aren't needed here 
+      // because our strict validation guarantees these fields exist in the DB.
+      const desc = exam.description;
+      const cat = exam.category;
+      const code = exam.examCode;
+      const time = `${exam.timeLimit} mins`;
+
+      // Inject the exam data into the template
       div.innerHTML = `
-        <h5>${exam.title}</h5>
+        <div class="d-flex justify-content-between align-items-start">
+            <h5 class="fw-bold text-primary mb-1">${exam.title}</h5>
+            <span class="badge bg-secondary">Code: ${code}</span>
+        </div>
 
-        <p class="small-muted">
-          Questions: ${exam.getQuestionCount()}
-        </p>
+        <p class="text-muted small mb-2">${desc}</p>
 
-        <p class="small-muted">
-          Created: ${new Date(exam.createdAt).toLocaleString()}
-        </p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="badge bg-info text-dark">Category: ${cat}</span>
+            <span class="badge bg-warning text-dark">Time: ${time}</span>
+            <span class="badge bg-light text-dark border">Questions: ${exam.getQuestionCount()}</span>
+        </div>
 
-        <button
-          class="btn btn-sm btn-success run-btn"
-          data-id="${exam.id}">
-          Run Exam
-        </button>
+        <div class="small text-muted mb-3" style="font-size: 0.8rem;">
+          <div><strong>Created:</strong> ${new Date(exam.createdAt).toLocaleString()}</div>
+          <div><strong>Exam ID:</strong> ${exam.id}</div>
+        </div>
 
-        <a href="edit-exam.html?id=${exam.id}" class="btn btn-sm btn-warning mx-1">
-          Edit
-        </a>
-        
-        <button
-          class="btn btn-sm btn-danger delete-btn"
-          data-id="${exam.id}">
-          Delete
-        </button>
+        <div class="border-top pt-3">
+            <button
+              class="btn btn-sm btn-success run-btn"
+              data-id="${exam.id}">
+              Run Exam
+            </button>
+
+            <a href="edit-exam.html?id=${exam.id}" class="btn btn-sm btn-warning mx-1">
+              Edit
+            </a>
+            
+            <button
+              class="btn btn-sm btn-danger delete-btn"
+              data-id="${exam.id}">
+              Delete
+            </button>
+        </div>
       `;
 
       this.examListElement.appendChild(div);
